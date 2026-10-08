@@ -1,0 +1,58 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+*.key
+
+# Medical datasets must never be committed
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*.csv
+
+# Model weights / adapters
+artifacts/*
+!artifacts/.gitkeep
+
+# MLflow local runs
+mlruns/
+mlartifacts/
+
+# caches
+.cache/
+huggingface/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large local datasets
+images/
+images.zip
+*.dcm
+
+# Hugging Face cache
+.cache/
+**/.cache/
+
+# Large training checkpoints
+artifacts/qwen2_5_vl_3b_qlora/checkpoint-*/
+artifacts/qwen2_5_vl_3b_qlora_test/
+
+# Local temporary files
+*.tmp
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Local MLflow database
+mlflow.db
+
+# Virtual environments
+.venv/
+venv/
+env/

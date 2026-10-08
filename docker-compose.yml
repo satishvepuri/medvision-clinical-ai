@@ -1,0 +1,21 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      MEDVISION_MODEL: HuggingFaceTB/SmolVLM-256M-Instruct
+    volumes:
+      - ./artifacts:/app/artifacts
+      - hf-cache:/root/.cache/huggingface
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.18.0
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlflow-docker:/mlflow
+
+volumes:
+  hf-cache:
