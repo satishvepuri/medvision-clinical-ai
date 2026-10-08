@@ -13,7 +13,7 @@ COPY app ./app
 COPY src ./src
 
 ENV PYTHONPATH=/app
-ENV MEDVISION_MODEL=HuggingFaceTB/SmolVLM-256M-Instruct
+ENV MEDVISION_MODEL=Qwen/Qwen2.5-VL-3B-Instruct
 
 EXPOSE 8000
 

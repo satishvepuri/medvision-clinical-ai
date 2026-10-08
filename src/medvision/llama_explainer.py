@@ -6,7 +6,7 @@ from pathlib import Path
 from transformers import pipeline
 
 
-DEFAULT_LLAMA = "meta-llama/Llama-3.2-1B-Instruct"
+DEFAULT_LLAMA = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
 
 def run_llama_check(

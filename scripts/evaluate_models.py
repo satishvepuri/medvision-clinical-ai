@@ -67,7 +67,7 @@ def main():
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(result, indent=2), encoding="utf-8")
 
-    mlflow.set_tracking_uri("file:./mlruns")
+    mlflow.set_tracking_uri("sqlite:///mlflow.db")
     mlflow.set_experiment("MedVision")
     with mlflow.start_run(run_name="base-vs-lora-evaluation"):
         for prefix, block in [("base", base), ("adapted", adapted)]:

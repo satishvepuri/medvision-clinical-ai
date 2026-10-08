@@ -28,7 +28,7 @@ Chest X-ray + clinical text
   OpenCV preprocessing
           |
           v
-SmolVLM-256M-Instruct
+Qwen2.5-VL-3B-Instruct
   + LoRA / PEFT adapter
           |
           +----> structured findings
@@ -47,7 +47,7 @@ Optional Llama text rewriter
 Training + evaluation metrics ---> MLflow
 ```
 
-The default vision-language model is `HuggingFaceTB/SmolVLM-256M-Instruct`, a small multimodal Transformers model. The project includes an optional Llama-family explanation stage for the resume technology stack.
+The default vision-language model is `HuggingFaceTB/Qwen2.5-VL-3B-Instruct`, a small multimodal Transformers model. The project includes an optional Llama-family explanation stage for the resume technology stack.
 
 ## Dataset
 

@@ -16,7 +16,7 @@ else:
     rows = 0
 checks.append(("15K+ real prepared image-text rows", rows >= 15000, f"{rows} rows"))
 
-adapter = Path("artifacts/medvision-lora/adapter_config.json")
+adapter = Path("artifacts/qwen2_5_vl_3b_qlora/adapter_config.json")
 checks.append(("LoRA/PEFT adapter saved", adapter.exists(), str(adapter)))
 
 evaluation = Path("artifacts/evaluation.json")
@@ -31,8 +31,8 @@ if evaluation.exists():
         eval_detail = str(exc)
 checks.append(("Base vs adapted evaluation saved", eval_ok, eval_detail))
 
-mlflow_ok = Path("mlruns").exists()
-checks.append(("MLflow experiment data exists", mlflow_ok, "mlruns/" if mlflow_ok else "missing"))
+mlflow_ok = Path("mlflow.db").exists()
+checks.append(("MLflow experiment data exists", mlflow_ok, "mlflow.db" if mlflow_ok else "missing"))
 
 api_ok = Path("app/main.py").exists()
 checks.append(("FastAPI application exists", api_ok, "app/main.py"))

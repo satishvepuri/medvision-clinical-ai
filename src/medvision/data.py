@@ -24,7 +24,14 @@ def row_labels(row) -> list[str]:
 
 
 def build_user_prompt(clinical_text: str) -> str:
-    clinical_text = (clinical_text or "").strip() or "No clinical history provided."
+    if clinical_text is None:
+        clinical_text = ""
+    elif pd.isna(clinical_text):
+        clinical_text = ""
+    else:
+        clinical_text = str(clinical_text)
+
+    clinical_text = clinical_text.strip() or "No clinical history provided."
     return (
         "You are analyzing a chest X-ray for an educational research benchmark. "
         "Use the image and clinical text. Return concise structured findings and "

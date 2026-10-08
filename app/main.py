@@ -21,7 +21,7 @@ engine = MedVisionEngine()
 def health():
     return {
         "status": "ok",
-        "model": os.getenv("MEDVISION_MODEL", "HuggingFaceTB/SmolVLM-256M-Instruct"),
+        "model": os.getenv("MEDVISION_MODEL", "Qwen/Qwen2.5-VL-3B-Instruct"),
         "clinical_use": False,
     }
 
