@@ -1,267 +1,136 @@
-# MedVision — Multimodal Clinical AI Assistant
+MedVision — Multimodal Clinical AI Assistant
+MedVision explores how vision-language models can work with chest X-ray images and clinical text to produce structured findings and readable explanations.
+I built this project to work through the practical challenges of a multimodal machine learning system: preparing image-report data, adapting a pretrained model, evaluating its outputs, and making inference available through an API.
+Research use only: MedVision is not a medical device, has not been clinically validated, and must not be used for diagnosis, treatment, triage, or other clinical decisions.
 
-MedVision is an educational/research portfolio project that combines chest X-ray images and clinical text to produce structured findings and plain-language explanations.
+Overview
+The pipeline combines chest X-ray images with optional clinical text. After image preprocessing, a vision-language model generates findings and an explanation. An optional Llama-family stage can rewrite the explanation. The application exposes inference through FastAPI and can be packaged with Docker.
+The project includes scripts for LoRA fine-tuning, evaluation against a base model, and tracking experiments with MLflow.
+Architecture
+Chest X-ray + optional clinical text
+                 |
+                 v
+         Image preprocessing
+             (OpenCV)
+                 |
+                 v
+        Qwen2.5-VL-3B-Instruct
+           + LoRA adapter
+                 |
+          +------+------+
+          |             |
+          v             v
+   Structured       Generated
+    findings        explanation
+          |             |
+          +------+------+
+                 |
+                 v
+       Optional Llama rewriter
+                 |
+                 v
+           FastAPI /analyze
+                 |
+                 v
+          Docker packaging
 
-**Important:** MedVision is **not a medical device**, is **not validated for diagnosis**, and must not be used to make clinical decisions.
+Training and evaluation results ---> MLflow
+The model integration uses Qwen2.5-VL-3B-Instruct with Hugging Face Transformers. Check the model identifier in your local configuration before running training or inference; the exact repository ID should match the weights you use.
+Technology stack
+Area	Tools
+Model development	Python, PyTorch, Hugging Face Transformers
+Multimodal modeling	Qwen2.5-VL-3B-Instruct
+Fine-tuning	LoRA, PEFT
+Image processing	OpenCV
+Data	CheXpert Plus image-report pairs
+Evaluation	Accuracy, F1, ROUGE-L
+Experiment tracking	MLflow
+Inference	FastAPI
+Packaging	Docker
+Optional text refinement	Llama-family model
 
-## What this project demonstrates
 
-- PyTorch + Hugging Face Transformers
-- Multimodal vision-language modeling
-- LoRA / PEFT parameter-efficient fine-tuning
-- OpenCV image preprocessing
-- CheXpert Plus image-report data preparation
-- Base-vs-adapted model evaluation
-- Classification accuracy and F1 metrics
-- Response-quality scoring with ROUGE-L
-- MLflow experiment tracking
-- FastAPI inference API
-- Docker packaging
-- Optional Llama-family text explanation stage
-
-## Architecture
-
-```text
-Chest X-ray + clinical text
-          |
-          v
-  OpenCV preprocessing
-          |
-          v
-Qwen2.5-VL-3B-Instruct
-  + LoRA / PEFT adapter
-          |
-          +----> structured findings
-          |
-          +----> generated explanation
-          |
-          v
-Optional Llama text rewriter
-          |
-          v
-      FastAPI
-          |
-          v
-   Docker container
-
-Training + evaluation metrics ---> MLflow
-```
-
-The default vision-language model is `HuggingFaceTB/Qwen2.5-VL-3B-Instruct`, a small multimodal Transformers model. The project includes an optional Llama-family explanation stage for the resume technology stack.
-
-## Dataset
-
-The full project is designed for **CheXpert Plus**, which pairs chest X-rays with radiology reports and pathology annotations.
-
-You download the dataset yourself from Stanford AIMI / Redivis and place the files under `data/raw/`. The repository does **not** redistribute medical images or reports.
-
-The full resume milestone uses a patient-separated manifest of **15,000 image-text samples**.
-
-## Beginner path
-
-Do these in order:
-
-1. `setup_windows.bat`
-2. `create_demo_data.bat`
-3. `run_checks.bat`
-4. Download CheXpert Plus and prepare 15,000 real image-text pairs
-5. Run a small local training test
-6. Run full LoRA training on a GPU machine / Colab
-7. Evaluate base vs adapted models
-8. Run MLflow
-9. Run FastAPI
-10. Run the resume-claim verifier
-11. Push to GitHub
-
-Read `BEGINNER_GUIDE.md` for exact instructions.
-
-## Quick setup on Windows
-
-Open this project folder in File Explorer. Click the address bar, type `cmd`, and press Enter.
-
-Then run:
-
-```cmd
-setup_windows.bat
-```
-
-Create harmless synthetic demo data:
-
-```cmd
-create_demo_data.bat
-```
-
-Check the project:
-
-```cmd
-run_checks.bat
-```
-
-## Prepare 15,000 CheXpert Plus samples
-
-After downloading CheXpert Plus, place:
-
-```text
-data/raw/df_chexpert_plus_240401.csv
-data/raw/chexbert_labels/findings_fixed.json
-data/raw/images/...
-```
-
-Then run:
-
-```cmd
+Dataset
+MedVision is designed to work with CheXpert Plus, a chest X-ray dataset with associated radiology reports and annotations.
+The preparation script builds a manifest linking image files with the corresponding text and labels. It supports patient-separated data preparation to reduce leakage between training and evaluation.
+The workflow can prepare up to 15,000 image-text pairs using the command below. This is a supported preparation target, not a published claim about completed training or evaluation results.
+The original medical images and reports are not distributed in this repository. Obtain access through the dataset provider and place the required files under data/raw/.
+Expected input structure:
+data/raw/
+├── df_chexpert_plus_240401.csv
+├── chexbert_labels/
+│   └── findings_fixed.json
+└── images/
+    └── ...
+Prepare the manifest on Windows:
 .venv\Scripts\python scripts\prepare_chexpert_plus.py ^
   --metadata data\raw\df_chexpert_plus_240401.csv ^
   --labels data\raw\chexbert_labels\findings_fixed.json ^
   --images-root data\raw\images ^
   --limit 15000
-```
-
-This creates:
-
-```text
+Generated files:
 data/processed/manifest.csv
 data/processed/dataset_summary.json
-```
-
-The script refuses to claim 15,000 samples unless it can actually resolve 15,000 image files.
-
-## Small LoRA training test
-
-Use a small number first:
-
-```cmd
+The preparation script checks that referenced image files can be resolved before including them in the manifest.
+Getting started
+These commands use Windows Command Prompt. Open a terminal in the repository root.
+Set up the environment:
+setup_windows.bat
+Generate synthetic data for a quick pipeline check:
+create_demo_data.bat
+Run the project checks:
+run_checks.bat
+For a more detailed walkthrough, see [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md). Synthetic demo data is for checking the software workflow, not for evaluating medical performance.
+Fine-tuning
+The training pipeline uses LoRA and PEFT to adapt the vision-language model while updating a smaller set of parameters than full-model fine-tuning.
+Start with a small test run to check the data and training workflow:
 .venv\Scripts\python scripts\train_vlm_lora.py --manifest data\processed\manifest.csv --limit 32 --epochs 1
-```
-
-For a real 15K training run, use a CUDA GPU and omit the small limit:
-
-```cmd
+For a larger run on a suitable CUDA GPU:
 .venv\Scripts\python scripts\train_vlm_lora.py --manifest data\processed\manifest.csv --limit 15000 --epochs 1
-```
-
-The adapter is saved under:
-
-```text
+The configured adapter output directory is:
 artifacts/medvision-lora
-```
-
-## Evaluate base vs adapted model
-
-Start small:
-
-```cmd
+The larger command is an example configuration; successful execution depends on available data, GPU memory, dependencies, and model settings.
+Evaluation
+The evaluation pipeline compares outputs from the pretrained model and the adapted model. It includes classification accuracy and F1 for structured predictions, as well as ROUGE-L for generated text.
+Run a small evaluation:
 .venv\Scripts\python scripts\evaluate_models.py --manifest data\processed\manifest.csv --limit 20
-```
-
-Then run a larger evaluation when your GPU budget allows it.
-
-Results are written to:
-
-```text
+The evaluation output is written to:
 artifacts/evaluation.json
-```
-
-and logged to MLflow.
-
-## MLflow
-
-Start the local experiment dashboard:
-
-```cmd
+Experiment metrics can also be logged to MLflow. The metrics should be interpreted in the context of the evaluation dataset and methodology; they are not evidence of clinical validity.
+Experiment tracking
+Start MLflow:
 start_mlflow.bat
-```
-
-Then open:
-
-```text
-http://127.0.0.1:5000
-```
-
-## FastAPI
-
-Start the API:
-
-```cmd
+Open http://127.0.0.1:5000 to inspect logged runs and metrics.
+Inference API
+FastAPI provides an /analyze endpoint that accepts an image and optional clinical text.
+Start the application:
 start_api.bat
-```
-
-Open:
-
-```text
+Interactive API documentation is available at:
 http://127.0.0.1:8000/docs
-```
-
-The `/analyze` endpoint accepts:
-
-- an image file
-- optional clinical text
-
-## Docker
-
-Build:
-
-```cmd
+The endpoint uses the configured inference pipeline. Model weights and adapters may need to be downloaded or made available locally before model-backed inference will work.
+Docker
+Build the application image:
 docker build -t medvision .
-```
-
-Run:
-
-```cmd
+Run it:
 docker run --rm -p 8000:8000 medvision
-```
-
-## Resume-claim verification
-
-Run:
-
-```cmd
-.venv\Scripts\python scripts\verify_resume_claims.py
-```
-
-Only use the full resume bullets after the verifier confirms the required evidence.
-
-## Resume wording after verification
-
-**MedVision — Multimodal Clinical AI Assistant | PyTorch, Hugging Face Transformers, Llama, LoRA, PEFT, OpenCV, MLflow, FastAPI**
-
-- Built a multimodal AI application combining medical text and chest X-ray images to classify findings, extract information, and generate explanations from 15K+ image-text samples using vision-language and transformer architectures.
-- Fine-tuned a vision-language model using LoRA and PEFT, comparing pretrained and adapted models using classification accuracy, F1 score, and response-quality metrics; tracked experiments with MLflow and served inference through FastAPI and Docker.
-
-Use the `15K+` wording only after `verify_resume_claims.py` confirms the dataset-size milestone.
-
-## Repository layout
-
-```text
+Docker packages the application environment; access to model weights, adapters, and hardware resources still needs to be configured for the intended inference setup.
+Repository structure
 medvision-clinical-ai/
-├── app/
-│   └── main.py
-├── artifacts/
-├── data/
-│   ├── raw/
-│   └── processed/
-├── notebooks/
-├── scripts/
-│   ├── check_environment.py
-│   ├── check_llama.py
-│   ├── create_demo_data.py
-│   ├── evaluate_models.py
-│   ├── prepare_chexpert_plus.py
-│   ├── train_vlm_lora.py
-│   └── verify_resume_claims.py
-├── src/medvision/
-│   ├── constants.py
-│   ├── data.py
-│   ├── image_utils.py
-│   ├── inference.py
-│   ├── llama_explainer.py
-│   └── metrics.py
-├── tests/
+├── app/                  # FastAPI application
+├── artifacts/            # Generated model and evaluation outputs
+├── data/                 # Raw and processed dataset locations
+├── notebooks/            # Exploration and experiments
+├── scripts/              # Preparation, training, evaluation, and checks
+├── src/medvision/        # Core preprocessing and inference modules
+├── tests/                # Project tests
 ├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
+├── BEGINNER_GUIDE.md
+├── DATASET.md
 └── README.md
-```
-
-## Safety and limitations
-
-This project is for learning and portfolio demonstration only. Generated findings can be wrong, incomplete, or misleading. Do not use MedVision for diagnosis, treatment, triage, or any other clinical decision.
+Limitations and next steps
+Vision-language models can generate incorrect, incomplete, or misleading findings, particularly on inputs that differ from the data used during development. Text-generation metrics also do not establish medical correctness.
+Areas worth improving include more extensive held-out evaluation, error analysis, uncertainty handling, inference reliability, and reproducibility across environments. Before making any performance claims, results should be supported by saved evaluation artifacts and clearly described test conditions.
+Project scope
+MedVision is an engineering and research project focused on multimodal model development and deployment. It is not intended to replace a radiologist or support real-world clinical decisions.
